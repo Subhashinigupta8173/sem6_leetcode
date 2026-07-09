@@ -5,26 +5,25 @@ class Solution {
         Arrays.sort(nums);
 
         int i = 0, j = 1;
-        int count = 0;
+        int c = 0;
 
-        while (i < nums.length && j < nums.length) {
-
-            if (i == j || nums[j] - nums[i] < k) {
+        while( i < nums.length && j <  nums.length){
+            if(i == j || nums[j] - nums[i] < k){
                 j++;
             }
-            else if (nums[j] - nums[i] > k) {
+            else if(nums[j] - nums[i] > k){
                 i++;
             }
-            else {
-                count++;
+            else{
                 i++;
-
-                while (i < nums.length && nums[i] == nums[i - 1]) {
+                c++;
+                while(i < nums.length && nums[i] == nums[i - 1]){
                     i++;
                 }
             }
-        }
 
-        return count;
+
+        }
+        return c;
     }
 }
