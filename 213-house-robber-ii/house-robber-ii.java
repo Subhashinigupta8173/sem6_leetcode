@@ -1,44 +1,42 @@
 class Solution {
-
     public int rob(int[] nums) {
-
         int n = nums.length;
 
-        // Agar sirf ek hi house hai
-        if (n == 1)
+        if (n == 1) {
             return nums[0];
+        }
 
-        // Case 1: Last house ko ignore karo
-        int case1 = helper(nums, 0, n - 2);
+        
+        int[] dp1 = new int[n];
+        Arrays.fill(dp1, -1);
+        int case1 = findMax(nums, dp1, n - 1, 1);
 
-        // Case 2: First house ko ignore karo
-        int case2 = helper(nums, 1, n - 1);
+        int[] dp2 = new int[n];
+        Arrays.fill(dp2, -1);
+        int case2 = findMax(nums, dp2, n - 2, 0);
 
         return Math.max(case1, case2);
     }
 
-    // House Robber I
-    public int helper(int[] nums, int start, int end) {
+    public static int findMax(int[] nums, int[] dp, int i, int start) {
 
-        int prev2 = 0; // dp[i-2]
-        int prev1 = 0; // dp[i-1]
-
-        for (int i = start; i <= end; i++) {
-
-            // Current house loot karo
-            int take = nums[i] + prev2;
-
-            // Current house skip karo
-            int notTake = prev1;
-
-            // Dono me se best
-            int curr = Math.max(take, notTake);
-
-            // DP shift
-            prev2 = prev1;
-            prev1 = curr;
+        if (i < start) {
+            return 0;
         }
 
-        return prev1;
+        if (i == start) {
+            return nums[i];
+        }
+
+        if (dp[i] != -1) {
+            return dp[i];
+        }
+
+        int take = nums[i] + findMax(nums, dp, i - 2, start);
+        int notTake = findMax(nums, dp, i - 1, start);
+
+        dp[i] = Math.max(take, notTake);
+
+        return dp[i];
     }
 }
