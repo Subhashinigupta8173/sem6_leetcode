@@ -1,40 +1,42 @@
 class Solution {
-    public int splitArray(int[] arr, int k) {
-        int totalsum=arr[0];
-        int max=arr[0];
-        for(int i=1;i<arr.length;i++){
-            totalsum+=arr[i];
-            max=Math.max(max,arr[i]);
+    public int splitArray(int[] nums, int k) {
+        int n  = nums.length;
+        int lower =  Integer.MIN_VALUE;
+        int high = 0;
+        if(n < k){
+            return 0;
         }
-        int low=max;
-        int h=totalsum;
-        while(low<=h){
-            int mid= low+(h-low)/2;
-            if(Cansplit(arr,k,mid)){
-                h=mid-1;
+        for(int num : nums){
+            lower = Math.max(lower , num);
+            high += num;
+        }
+        int Kcal = 0;
+        
+        while(lower <= high){
+            int mid = lower + (high - lower) / 2;
+            if(canFit(nums,mid,k)){
+                Kcal = mid;
+                high = mid - 1;
             }
             else{
-                low=mid+1;
+                lower = mid + 1;
             }
         }
-        return low;
+        return Kcal;
 
     }
-
-    public static boolean Cansplit (int [] arr,int k,int t){
-        int sum=0;
-        int p=1;
-        for(int i=0;i<arr.length;i++){
-            if(sum+arr[i]>t){
-                p++;
-                sum=arr[i];
+    public boolean canFit(int [] nums ,int mid ,int k){
+        int c = 1;
+        int sum = 0;
+        for(int num : nums){
+            if(sum + num > mid){
+                c++;
+                sum = num;
             }
             else{
-                sum+=arr[i];
+                sum += num;
             }
-
         }
-        return p<=k;
+        return c <= k;
     }
-       
 }
