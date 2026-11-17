@@ -1,51 +1,103 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+class Solution {
+    private int largerValidSize;
+    private int smallerValidSize;
 
-public class Solution {
+    private final PriorityQueue<Integer> larger = new PriorityQueue<>();
+    private final PriorityQueue<Integer> smaller  = new PriorityQueue<>(Collections.reverseOrder());
+    private final Map<Integer, Integer> delayedFreqMap = new HashMap<>();
+
     public double[] medianSlidingWindow(int[] nums, int k) {
-        List<Double> resList = new ArrayList<>();
+        
+        // Sliding window
         int n = nums.length;
-        int i = 0;
-        int j = k - 1;
-        List<Integer> temp = new ArrayList<>();
-        for (int x = 0; x < k - 1; x++) {
-            temp.add(nums[x]);
-        }
-        Collections.sort(temp);
-        while (j < n) {
-            int num = nums[j];
-            int insertIdx = Collections.binarySearch(temp, num);
-            if (insertIdx < 0) {
-                insertIdx = -insertIdx - 1;
-            }
-            temp.add(insertIdx, num);
+        double[] result = new double[n - k + 1];
+        for(int i = 0; i < n; i++) {
+            // Add to window
+            addNum(nums[i]);
 
-            if (k % 2 == 1) {
-                double median = (double) temp.get(k / 2);
-                resList.add(median);
-            } else {
-                int idx = k / 2;
-                double median1 = (double) temp.get(idx);
-                double median2 = (double) temp.get(idx - 1);
-                resList.add((median1 + median2) / 2);
+            // Remove if needed
+            if(i >= k) {
+                removeNum(nums[i-k]);
             }
 
-            int removeIdx = Collections.binarySearch(temp, nums[i]);
-            if (removeIdx < 0) {
-                removeIdx = -removeIdx - 1;
+            // Update solution
+            if(i >= k - 1) {
+                result[i-k+1] = getMedian(k);
             }
-            temp.remove(removeIdx);
+            
 
-            i++;
-            j++;
         }
-
-        double[] resArray = new double[resList.size()];
-        for (int x = 0; x < resList.size(); x++) {
-            resArray[x] = resList.get(x);
-        }
-
-        return resArray;
+        return result;
     }
+
+    private void addNum(int num) {
+        if(larger.isEmpty() || num >= larger.peek()) {
+            larger.offer(num);largerValidSize++;
+        } else {
+            smaller.offer(num);smallerValidSize++;
+        }
+        rebalance();
+    }
+
+    private void removeNum(int num) {
+        // Add to delay map
+        delayedFreqMap.merge(num, 1, Integer::sum);
+
+        // Update logical valid size
+        if(num <= smaller.peek()) {
+
+            smallerValidSize--;
+            if(num == smaller.peek()) {
+                prune(smaller);
+            }
+        } else {
+            largerValidSize--;
+            if(num == larger.peek()) {
+                prune(larger);
+            }
+        }
+        rebalance();
+    }
+
+    // Goal, maintain larger size >= smaller + 1
+    private void rebalance() {
+        if(largerValidSize > smallerValidSize) {
+            prune(larger);
+            smaller.offer(larger.poll());
+            smallerValidSize++;
+            largerValidSize--;
+            prune(larger);
+        } else if(smallerValidSize > largerValidSize + 1) {
+            prune(smaller);
+            larger.offer(smaller.poll());
+            smallerValidSize--;
+            largerValidSize++;
+            prune(smaller);
+        }
+
+    }
+
+    private void prune(PriorityQueue<Integer> heap) {
+        // real Delete
+        while(!heap.isEmpty() && delayedFreqMap.containsKey(heap.peek())) {
+            int num = heap.poll();
+            int freq = delayedFreqMap.get(num);
+            if(freq == 1) {
+                delayedFreqMap.remove(num);
+            } else {
+                delayedFreqMap.merge(num, -1, Integer::sum);
+            }
+        }
+    }
+
+    private double getMedian(int k) {
+        int size = largerValidSize + smallerValidSize;
+        if(size == 0) return 0;
+        if(k % 2 == 0) {
+            return ((double) larger.peek() + smaller.peek()) / 2.0;
+        } else {
+            return (double) smaller.peek();
+        }
+    }
+
 }
