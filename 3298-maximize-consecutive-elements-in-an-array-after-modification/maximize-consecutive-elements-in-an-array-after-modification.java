@@ -10,38 +10,29 @@ class Solution {
             Arrays.fill(dp[i] , -1);
         }
 
-        for (int i = 0; i < n; i++) {
-            result = Math.max(result,
-                    Math.max(Solve(i, 0, nums), Solve(i, 1, nums)));
+        for(int i = n-1; i>=0; i--){
+            for(int inc = 0; inc <= 1; inc++){
+                int curr = nums[i] + inc;
+                int len = 1;
+                int j = FindCurrent(nums, i + 1, curr + 1);
+                if (j != -1) {
+                    len = Math.max(len, 1 + dp[j][0]);
+                }
+                j = FindCurrent(nums, i + 1, curr);
+
+                if (j != -1) {
+                    len = Math.max(len, 1 + dp[j][1]);
+                }     
+                dp[i][inc] = len;
+                result = Math.max(result,len);
+
+
+ 
+            }
         }
 
         return result;
     }
-
-    public  int Solve(int i, int inc, int[] nums) {
-        if(dp[i][inc] != -1){
-            return dp[i][inc];
-        }
-        int curr = nums[i] + inc;
-        int len = 1;
-
-        // Option 1: Find curr + 1
-        int j = FindCurrent(nums, i + 1, curr + 1);
-
-        if (j != -1) {
-            len = Math.max(len, 1 + Solve(j, 0, nums));
-        }
-
-        // Option 2: Find curr
-        j = FindCurrent(nums, i + 1, curr);
-
-        if (j != -1) {
-            len = Math.max(len, 1 + Solve(j, 1, nums));
-        }
-
-        return dp[i][inc] = len;
-    }
-
     public static int FindCurrent(int[] nums, int i, int target) {
         int ans = -1;
         int n = nums.length;
